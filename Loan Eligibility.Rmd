@@ -25,7 +25,7 @@ glimpse(data)
 
 
 ### Visualizations
-Through visual reports, let us explore the data and see if relationships can be found between the variables. Our focus will be on the target variable - Loan_Status.
+Through visual reports, let us explore the data and see if relationships can be found between the variables. Our focus will be on the target variable --- Loan_Status.
 
 #### 1. Gender and Loan Status
 ```{r, message=F}
