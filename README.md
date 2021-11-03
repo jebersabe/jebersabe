@@ -1,4 +1,4 @@
-### Hi there 👋
+### Data exploration using the tidyverse package and data visualization using ggplot2
 
 <!--
 **jebersabe/jebersabe** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
