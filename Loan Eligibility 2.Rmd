@@ -1,0 +1,328 @@
+---
+title: "Loan Eligibility: Visualizations"
+knit: (function(input_file, encoding) {
+  out_dir <- 'docs';
+  rmarkdown::render(input_file,
+ encoding=encoding,
+ output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
+author: "Jake Bersabe"
+date: "02/11/2021"
+output: rmarkdown::html_document
+---
+Let's start by importing the data set.
+```{r setup, include=T,message=FALSE}
+library(dplyr)
+data <- read.csv("train.csv")
+```
+```{r include=FALSE}
+as_tibble(data)
+```
+
+
+```{r}
+glimpse(data)
+```
+
+
+### Visualizations
+Through visual reports, let us explore the data and see if relationships can be found between the variables. Our focus will be on the target variable - Loan_Status.
+
+#### 1. Gender and Loan Status
+```{r, message=F}
+data %>% 
+  filter(Gender != "") %>% 
+  group_by(Gender, Loan_Status) %>% 
+  summarise(Count=n()) %>% 
+  mutate(Percentage=paste(round(Count*100/sum(Count),1),"%"))
+
+```
+After removing the missing values, the data frame was then grouped by Gender and Loan_Status and summarized to give the count of each row entry and the corresponding percentages. The resulting data frame was then graphed to visualize the comparison. Similar approach will be applied in the succeeding items.
+
+```{r message=FALSE, fig.cap=">*Roughly equal distribution of loan approval and disapproval across the genders.*"}  
+library(ggplot2)
+data %>% 
+  filter(Gender != "") %>% 
+  group_by(Gender, Loan_Status) %>% 
+  summarise(Count=n()) %>% 
+  mutate(Percentage=round(Count*100/sum(Count),1)) %>% 
+  ggplot(aes(x=Gender,y=Percentage,fill=Loan_Status))+
+  geom_col(position = "stack")+
+  theme_minimal()+
+  ggtitle("Gender and Loan Status")+
+  scale_y_continuous(limits = c(0,100))  
+
+```
+
+
+#### 2. Civil Status and Loan Status
+```{r message=FALSE}
+data %>% 
+  filter(Married != "") %>% 
+  group_by(Married, Loan_Status) %>% 
+  summarise(Count=n()) %>% 
+  mutate(Percentage=paste(round(Count*100/sum(Count),1),"%"))
+
+```
+```{r echo=F, message=FALSE, fig.cap=">*More married applicants are approved and less married applicants are disapproved than unmarried applicants.*"}
+data %>% 
+  filter(Married != "") %>% 
+  group_by(Married, Loan_Status) %>% 
+  summarise(Count=n()) %>% 
+  mutate(Percentage=Count*100/sum(Count)) %>% 
+  ggplot(aes(x=Married,y=Percentage,fill=Loan_Status))+
+  geom_col(position = "stack")+
+  theme_minimal()+
+  ggtitle("Civil Status and Loan Status")+
+  scale_y_continuous(limits = c(0,100))
+```
+
+#### 3. Number of Dependents and Loan Status
+```{r message=FALSE}
+data %>% 
+  filter(Dependents != "") %>% 
+  group_by(Dependents, Loan_Status) %>% 
+  summarise(Count=n()) %>% 
+  mutate(Percentage=paste(round(Count*100/sum(Count),1),"%"))
+```
+
+```{r message=FALSE, echo=FALSE, fig.cap=">*Highest approval and lowest loan disapproval in the applicants with two dependents.*"}
+data %>% 
+  filter(Dependents != "") %>% 
+  group_by(Dependents, Loan_Status) %>% 
+  summarise(Count=n()) %>% 
+  mutate(Percentage=Count*100/sum(Count)) %>% 
+  ggplot(aes(x=Dependents,y=Percentage,fill=Loan_Status))+
+  geom_col(position = "stack")+
+  theme_minimal()+
+  ggtitle("Dependents and Loan Status")+
+  scale_y_continuous(limits = c(0,100))
+
+```
+
+#### 4. Educational Background and Loan Status
+
+```{r message=FALSE}
+data %>% 
+  group_by(Education, Loan_Status) %>% 
+  summarise(Count=n()) %>% 
+  mutate(Percentage=paste(round(Count*100/sum(Count),1),"%"))
+
+```
+
+
+```{r message=FALSE, fig.cap=">*Graduate applicants are getting more loan approvals.*"}
+data %>% 
+  group_by(Education, Loan_Status) %>% 
+  summarise(Count=n()) %>% 
+  mutate(Percentage=round(Count*100/sum(Count),1)) %>% 
+  ggplot(aes(x=Education, y=Percentage, fill=Loan_Status))+
+  geom_col(position = "stack")+
+  theme_minimal()+
+  ggtitle("Education and Loan Status")+
+  scale_y_continuous(limits = c(0,100))
+```
+
+#### 5. Self-employment and Loan Status
+
+```{r message=F}
+data %>% 
+  filter(Self_Employed != "") %>% 
+  group_by(Self_Employed, Loan_Status) %>% 
+  summarise(Count=n()) %>% 
+  mutate(Percentage=round(Count*100/sum(Count),1))
+```
+
+```{r message=F, echo=FALSE, fig.cap=">*Almost equal distribution of approved and disapproved loans across the self-employed and not self-employed applicants.*"}
+data %>% 
+  filter(Self_Employed != "") %>% 
+  group_by(Self_Employed, Loan_Status) %>% 
+  summarise(Count=n()) %>% 
+  mutate(Percentage=round(Count*100/sum(Count),1)) %>% 
+  ggplot(aes(x=Self_Employed,y=Percentage,fill=Loan_Status))+
+  geom_col(position = "stack")+
+  theme_minimal()+
+  ggtitle("Self Employment and Loan Status")+
+  scale_y_continuous(limits = c(0,100))
+```
+
+#### 6. Loan Amount and Loan Status
+First, let us check the distribution of data.
+```{r fig.cap=">*The distribution of loan amount is right-skewed due to outliers. We need to perform logarithmic transformation to deal with the outliers.*"}
+data %>% 
+  filter(LoanAmount != "") %>% 
+  ggplot(aes(x=LoanAmount))+
+  geom_density(fill="#C4ADBF",alpha=0.6)+
+  theme_minimal()+
+  ggtitle("Density Plot of Loan Amount")
+```
+
+  
+
+```{r message=F}
+data %>% 
+  filter(LoanAmount != "") %>% 
+  group_by(Loan_Status) %>% 
+  summarise(Count = n(), 
+            MeanLoanAmount=mean(LoanAmount*1000) %>% round(2))
+```
+
+
+```{r message=F}
+data %>% 
+  filter(LoanAmount != "") %>% 
+  group_by(Loan_Status) %>% 
+  summarise(Count = n(), 
+            MeanLoanAmount=mean(LoanAmount*1000) %>% round(0)) %>% 
+  ggplot(aes(x=Loan_Status, y=MeanLoanAmount))+
+  theme_minimal()+
+  geom_col(fill=c("#F8766D","#00BFC4"))+
+  geom_text(aes(label=MeanLoanAmount), vjust = -0.5, fontface = "bold")+
+  ggtitle("Mean Loan Amount and Loan Status")
+```
+
+
+
+
+
+#### 7. Applicant Income and Loan Status
+Again, let us check the distribution.
+
+```{r fig.cap=">*Just like the loan amount, the distribution of applicant income is right-skewed too. Proceed with logarithmic transformation.*"}
+data %>% 
+  ggplot(aes(x=ApplicantIncome))+
+  geom_density(fill="#C4ADBF",alpha=0.6)+
+  theme_minimal()+
+  ggtitle("Density Plot of Applicant Income")
+```
+
+
+```{r message=F}
+data %>% 
+  group_by(Loan_Status) %>% 
+  summarise(Count = n(),
+            MeanApplicantIncome=mean(ApplicantIncome) %>% 
+              round(2))
+```
+
+Log transformation is not required and we can use `t.test` in this case because the sample size is big enough.  
+
+```{r}
+data %>% 
+  group_by(Loan_Status) %>% 
+  summarise(Count = n(),
+            MeanApplicantIncome=mean(ApplicantIncome) %>% 
+              round(0)) %>% 
+  ggplot(aes(x = Loan_Status, y = MeanApplicantIncome))+
+  geom_col(fill=c("#F8766D","#00BFC4"))+
+  theme_minimal()+
+  geom_text(aes(label=MeanApplicantIncome), vjust = -0.5, fontface = "bold")+
+  ggtitle("Mean Applicant Income and Loan Status")
+
+```
+
+
+#### 8. Co-applicant Income and Loan Status
+Again, let us check the distribution.
+
+```{r fig.cap=">*The distribution of the co-applicant income is right-skewed and bi-modal.*"}
+data %>% 
+  ggplot(aes(x=CoapplicantIncome))+
+  geom_density(fill="#C4ADBF",alpha=0.6)+
+  theme_minimal()+
+  ggtitle("Density Plot of Coapplicant Income")
+```
+
+
+```{r message=F}
+data %>% 
+  group_by(Loan_Status) %>% 
+  summarise(Count = n(),
+            MeanCoapplicantIncome=mean(CoapplicantIncome) %>%  round(2))
+```
+
+
+```{r}
+data %>% 
+  group_by(Loan_Status) %>% 
+  summarise(Count = n(),
+            MeanCoapplicantIncome=mean(CoapplicantIncome) %>% round(2)) %>% 
+  ggplot(aes(x = Loan_Status, y = MeanCoapplicantIncome))+
+  geom_col(fill=c("#F8766D","#00BFC4"))+
+  geom_text(aes(label=MeanCoapplicantIncome), vjust = -0.5, fontface = "bold")+
+  ggtitle("Mean Coapplicant Income and Loan Status")+
+  theme_minimal()
+```
+
+
+#### 9. Loan Amount Term and Loan Status
+```{r message=FALSE}
+data %>% 
+  filter(Loan_Amount_Term != "") %>% 
+  mutate(Loan_Amount_Term = factor(Loan_Amount_Term),
+         Loan_Amount_Term = forcats::fct_lump(Loan_Amount_Term, n = 3)) %>% 
+  group_by(Loan_Amount_Term,Loan_Status) %>% 
+  summarise(Count=n()) %>% 
+  mutate(Percentage  = paste(round(Count*100/sum(Count),1),"%"))
+```
+
+```{r message=FALSE, echo=FALSE, fig.cap=">*480 months loan amount term has the lowest loan approval and the highest loan disapproval.*"  }
+data %>% 
+  filter(Loan_Amount_Term != "") %>% 
+  mutate(Loan_Amount_Term = factor(Loan_Amount_Term),
+         Loan_Amount_Term = forcats::fct_lump(Loan_Amount_Term, n = 3)) %>% 
+  group_by(Loan_Amount_Term,Loan_Status) %>% 
+  summarise(Count=n()) %>% 
+  mutate(Percentage  = round(Count*100/sum(Count),1)) %>% 
+  ggplot(aes(x=Loan_Amount_Term,y=Percentage,fill=Loan_Status))+
+  geom_col(position = 'stack')+
+  ggtitle("Loan Amount Term and Loan Status (Top 3)")+
+  scale_y_continuous(limits = c(0,100))+
+  theme_minimal()
+```
+
+#### 10. Credit History and Loan Status
+
+```{r message=FALSE}
+data %>% 
+  filter(Credit_History != "") %>% 
+  group_by(Credit_History,Loan_Status) %>% 
+  summarise(Count=n()) %>% 
+  mutate(Percentage  = paste(round(Count*100/sum(Count),1),"%"))
+```
+
+```{r message=FALSE, echo=FALSE, fig.cap=">*Applicants with no credit history have the higher loan disapproval rate and applicants with credit history have higher loan approval rate.*"  }
+data %>% 
+  filter(Credit_History != "") %>% 
+  mutate(Credit_History = factor(Credit_History)) %>% 
+  group_by(Credit_History,Loan_Status) %>% 
+  summarise(Count=n()) %>% 
+  mutate(Percentage  = Count*100/sum(Count)) %>% 
+  ggplot(aes(x=Credit_History,y=Percentage,fill=Loan_Status))+
+  geom_col(position="stack")+
+  scale_y_continuous(limits = c(0,100))+
+  ggtitle("Credit History and Loan Status")+
+  theme_minimal()
+
+```
+
+#### 11. Property Area and Loan Status
+
+```{r message=FALSE}
+data %>% 
+  group_by(Property_Area,Loan_Status) %>% 
+  summarise(Count=n()) %>% 
+  mutate(Percentage  = paste(round(Count*100/sum(Count),1),"%"))
+```
+
+```{r message=FALSE, echo=FALSE, fig.cap=">*Semi-urban property area has the highest loan approval rate.*"  }
+data %>% 
+  group_by(Property_Area,Loan_Status) %>% 
+  summarise(Count=n()) %>% 
+  mutate(Percentage  = Count*100/sum(Count)) %>% 
+  ggplot(aes(x=Property_Area,y=Percentage,fill=Loan_Status))+
+  geom_col(position="stack")+
+  scale_y_continuous(limits = c(0,100))+
+  ggtitle("Property Area and Loan Status")+
+  theme_minimal()
+
+```
