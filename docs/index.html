@@ -174,21 +174,21 @@ pre code {
 
 <p>Let’s start by importing the data set.</p>
 <pre class="r"><code>library(dplyr)
-data &lt;- read.csv(&quot;train.csv&quot;)</code></pre>
+data &lt;- readr::read_csv(&quot;train.csv&quot;)</code></pre>
 <pre class="r"><code>glimpse(data)</code></pre>
 <pre><code>## Rows: 614
 ## Columns: 13
-## $ ï..Loan_ID        &lt;chr&gt; &quot;LP001002&quot;, &quot;LP001003&quot;, &quot;LP001005&quot;, &quot;LP001006&quot;, &quot;LP0~
+## $ Loan_ID           &lt;chr&gt; &quot;LP001002&quot;, &quot;LP001003&quot;, &quot;LP001005&quot;, &quot;LP001006&quot;, &quot;LP0~
 ## $ Gender            &lt;chr&gt; &quot;Male&quot;, &quot;Male&quot;, &quot;Male&quot;, &quot;Male&quot;, &quot;Male&quot;, &quot;Male&quot;, &quot;Mal~
 ## $ Married           &lt;chr&gt; &quot;No&quot;, &quot;Yes&quot;, &quot;Yes&quot;, &quot;Yes&quot;, &quot;No&quot;, &quot;Yes&quot;, &quot;Yes&quot;, &quot;Yes&quot;~
-## $ Dependents        &lt;int&gt; 0, 1, 0, 0, 0, 2, 0, 3, 2, 1, 2, 2, 2, 0, 2, 0, 1, 0~
+## $ Dependents        &lt;dbl&gt; 0, 1, 0, 0, 0, 2, 0, 3, 2, 1, 2, 2, 2, 0, 2, 0, 1, 0~
 ## $ Education         &lt;chr&gt; &quot;Graduate&quot;, &quot;Graduate&quot;, &quot;Graduate&quot;, &quot;Not Graduate&quot;, ~
 ## $ Self_Employed     &lt;chr&gt; &quot;No&quot;, &quot;No&quot;, &quot;Yes&quot;, &quot;No&quot;, &quot;No&quot;, &quot;Yes&quot;, &quot;No&quot;, &quot;No&quot;, &quot;N~
-## $ ApplicantIncome   &lt;int&gt; 5849, 4583, 3000, 2583, 6000, 5417, 2333, 3036, 4006~
+## $ ApplicantIncome   &lt;dbl&gt; 5849, 4583, 3000, 2583, 6000, 5417, 2333, 3036, 4006~
 ## $ CoapplicantIncome &lt;dbl&gt; 0, 1508, 0, 2358, 0, 4196, 1516, 2504, 1526, 10968, ~
-## $ LoanAmount        &lt;int&gt; NA, 128, 66, 120, 141, 267, 95, 158, 168, 349, 70, 1~
-## $ Loan_Amount_Term  &lt;int&gt; 360, 360, 360, 360, 360, 360, 360, 360, 360, 360, 36~
-## $ Credit_History    &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, NA, ~
+## $ LoanAmount        &lt;dbl&gt; NA, 128, 66, 120, 141, 267, 95, 158, 168, 349, 70, 1~
+## $ Loan_Amount_Term  &lt;dbl&gt; 360, 360, 360, 360, 360, 360, 360, 360, 360, 360, 36~
+## $ Credit_History    &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, NA, ~
 ## $ Property_Area     &lt;chr&gt; &quot;Urban&quot;, &quot;Rural&quot;, &quot;Urban&quot;, &quot;Urban&quot;, &quot;Urban&quot;, &quot;Urban&quot;~
 ## $ Loan_Status       &lt;chr&gt; &quot;Y&quot;, &quot;N&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;Y&quot;, &quot;N&quot;, &quot;Y&quot;, &quot;N&quot;, &quot;Y~</code></pre>
 <div id="visualizations" class="section level3">
@@ -264,7 +264,7 @@ data %&gt;%
 <pre><code>## # A tibble: 8 x 4
 ## # Groups:   Dependents [4]
 ##   Dependents Loan_Status Count Percentage
-##        &lt;int&gt; &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;     
+##        &lt;dbl&gt; &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;     
 ## 1          0 N             107 31 %      
 ## 2          0 Y             238 69 %      
 ## 3          1 N              36 35.3 %    
@@ -505,7 +505,7 @@ data %&gt;%
 <pre><code>## # A tibble: 4 x 4
 ## # Groups:   Credit_History [2]
 ##   Credit_History Loan_Status Count Percentage
-##            &lt;int&gt; &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;     
+##            &lt;dbl&gt; &lt;chr&gt;       &lt;int&gt; &lt;chr&gt;     
 ## 1              0 N              82 92.1 %    
 ## 2              0 Y               7 7.9 %     
 ## 3              1 N              97 20.4 %    
