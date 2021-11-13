@@ -7,12 +7,12 @@ knit: (function(input_file, encoding) {
  output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
 author: "Jake Bersabe"
 date: "02/11/2021"
-output: html_document
+output: rmarkdown::html_document
 ---
 Let's start by importing the data set.
 ```{r setup, include=T,message=FALSE}
 library(dplyr)
-data <- readr::read_csv("train.csv")
+data <- read.csv("train.csv")
 ```
 ```{r include=FALSE}
 as_tibble(data)
@@ -25,7 +25,7 @@ glimpse(data)
 
 
 ### Visualizations
-Through visual reports, let us explore the data and see if relationships can be found between the variables. Our focus will be on the target variable --- Loan_Status.
+Through visual reports, let us explore the data and see if relationships can be found between the variables. Our focus will be on the target variable - Loan_Status.
 
 #### 1. Gender and Loan Status
 ```{r, message=F}
@@ -99,16 +99,37 @@ data %>%
 
 ```
 
+#### 4. Educational Background and Loan Status
+
+```{r message=FALSE}
+data %>% 
+  group_by(Education, Loan_Status) %>% 
+  summarise(Count=n()) %>% 
+  mutate(Percentage=paste(round(Count*100/sum(Count),1),"%"))
+
+```
 
 
-#### 4. Self-employment and Loan Status
+```{r message=FALSE, fig.cap=">*Graduate applicants are getting more loan approvals.*"}
+data %>% 
+  group_by(Education, Loan_Status) %>% 
+  summarise(Count=n()) %>% 
+  mutate(Percentage=round(Count*100/sum(Count),1)) %>% 
+  ggplot(aes(x=Education, y=Percentage, fill=Loan_Status))+
+  geom_col(position = "stack")+
+  theme_minimal()+
+  ggtitle("Education and Loan Status")+
+  scale_y_continuous(limits = c(0,100))
+```
+
+#### 5. Self-employment and Loan Status
 
 ```{r message=F}
 data %>% 
   filter(Self_Employed != "") %>% 
   group_by(Self_Employed, Loan_Status) %>% 
   summarise(Count=n()) %>% 
-  mutate(Percentage=paste(round(Count*100/sum(Count),1),"%"))
+  mutate(Percentage=round(Count*100/sum(Count),1))
 ```
 
 ```{r message=F, echo=FALSE, fig.cap=">*Almost equal distribution of approved and disapproved loans across the self-employed and not self-employed applicants.*"}
@@ -124,7 +145,7 @@ data %>%
   scale_y_continuous(limits = c(0,100))
 ```
 
-#### 5. Loan Amount and Loan Status
+#### 6. Loan Amount and Loan Status
 First, let us check the distribution of data.
 ```{r fig.cap=">*The distribution of loan amount is right-skewed due to outliers. We need to perform logarithmic transformation to deal with the outliers.*"}
 data %>% 
@@ -137,43 +158,33 @@ data %>%
 
   
 
-```{r message=F, fig.cap=">*The distribution is nearly normal now and we can proceed with the comparison now.*"}
+```{r message=F}
 data %>% 
   filter(LoanAmount != "") %>% 
-  mutate(Log_of_LoanAmount = log(LoanAmount)) %>% 
-  ggplot(aes(x=Log_of_LoanAmount))+
-  geom_density(fill="#C4ADBF",alpha=0.6)+
-  theme_minimal()+
-  ggtitle("Density Plot of Log_of_LoanAmount")
+  group_by(Loan_Status) %>% 
+  summarise(Count = n(), 
+            MeanLoanAmount=mean(LoanAmount*1000) %>% round(2))
 ```
 
-  
 
 ```{r message=F}
 data %>% 
   filter(LoanAmount != "") %>% 
-  mutate(Log_of_LoanAmount = log(LoanAmount)) %>% 
   group_by(Loan_Status) %>% 
   summarise(Count = n(), 
-            MeanLoanAmount=round(mean(LoanAmount),2),
-            MeanLog=round(mean(Log_of_LoanAmount),2))
-```
-
-```{r message=F, fig.cap=">*Roughly equal mean between approved and disapproved loans.*"}
-data %>% 
-  filter(LoanAmount != "") %>% 
-  mutate(Log_of_LoanAmount = log(LoanAmount)) %>% 
-  group_by(Loan_Status) %>% 
-  summarise(Mean=round(mean(LoanAmount),2),MeanLog=round(mean(Log_of_LoanAmount),2)) %>% 
-  ggplot(aes(x=Loan_Status,y=MeanLog))+
+            MeanLoanAmount=mean(LoanAmount*1000) %>% round(0)) %>% 
+  ggplot(aes(x=Loan_Status, y=MeanLoanAmount))+
   theme_minimal()+
   geom_col(fill=c("#F8766D","#00BFC4"))+
-  geom_text(aes(label=MeanLog), vjust = -0.5, fontface = "bold")+
-  scale_y_continuous(trans='log10')+
-  ggtitle("Log Loan Amount and Loan Status")
+  geom_text(aes(label=MeanLoanAmount), vjust = -0.5, fontface = "bold")+
+  ggtitle("Mean Loan Amount and Loan Status")
 ```
 
-#### 6. Applicant Income and Loan Status
+
+
+
+
+#### 7. Applicant Income and Loan Status
 Again, let us check the distribution.
 
 ```{r fig.cap=">*Just like the loan amount, the distribution of applicant income is right-skewed too. Proceed with logarithmic transformation.*"}
@@ -184,41 +195,33 @@ data %>%
   ggtitle("Density Plot of Applicant Income")
 ```
 
-  
-
-```{r fig.cap=">*The distribution is roughly equal now.*"}
-data %>% 
-  mutate(Log_ApplicantIncome = log(ApplicantIncome)) %>% 
-  ggplot(aes(x=Log_ApplicantIncome))+
-  geom_density(fill="#C4ADBF",alpha=0.6)+
-  theme_minimal()+
-  ggtitle("Density Plot of Log Applicant Income")
-```
 
 ```{r message=F}
 data %>% 
-  mutate(Log_ApplicantIncome = log(ApplicantIncome)) %>% 
   group_by(Loan_Status) %>% 
   summarise(Count = n(),
-            MeanApplicantIncome=round(mean(ApplicantIncome),2),
-            MeanLog=round(mean(Log_ApplicantIncome),2))
+            MeanApplicantIncome=mean(ApplicantIncome) %>% 
+              round(2))
 ```
 
-```{r message=F, echo=FALSE, fig.cap=">*The means are roughly equal.*"}
+Log transformation is not required and we can use `t.test` in this case because the sample size is big enough.  
+
+```{r}
 data %>% 
-  mutate(Log_ApplicantIncome = log(ApplicantIncome)) %>% 
   group_by(Loan_Status) %>% 
-  summarise(Mean=round(mean(ApplicantIncome),2),
-            MeanLog=round(mean(Log_ApplicantIncome),2)) %>% 
-  ggplot(aes(x=Loan_Status,y=MeanLog))+
-  theme_minimal()+
+  summarise(Count = n(),
+            MeanApplicantIncome=mean(ApplicantIncome) %>% 
+              round(0)) %>% 
+  ggplot(aes(x = Loan_Status, y = MeanApplicantIncome))+
   geom_col(fill=c("#F8766D","#00BFC4"))+
-  geom_text(aes(label=MeanLog), vjust = -0.5, fontface = "bold")+
-  scale_y_continuous(trans='log10')+
-  ggtitle("Log Loan Amount and Loan Status")
+  theme_minimal()+
+  geom_text(aes(label=MeanApplicantIncome), vjust = -0.5, fontface = "bold")+
+  ggtitle("Mean Applicant Income and Loan Status")
+
 ```
 
-#### 7. Co-applicant Income and Loan Status
+
+#### 8. Co-applicant Income and Loan Status
 Again, let us check the distribution.
 
 ```{r fig.cap=">*The distribution of the co-applicant income is right-skewed and bi-modal.*"}
@@ -229,44 +232,29 @@ data %>%
   ggtitle("Density Plot of Coapplicant Income")
 ```
 
-  
-
-```{r}
-data %>% 
-  filter(CoapplicantIncome != "" & CoapplicantIncome>0) %>% 
-  mutate(Log_CoapplicantIncome = log(CoapplicantIncome)) %>% 
-  ggplot(aes(x=Log_CoapplicantIncome))+
-  geom_density(fill="#C4ADBF",alpha=0.6)+
-  theme_minimal()+
-  ggtitle("Density Plot of Log Coapplicant Income")
-```
 
 ```{r message=F}
 data %>% 
-  filter(CoapplicantIncome>0) %>% 
-  mutate(Log_CoapplicantIncome = log(CoapplicantIncome)) %>% 
   group_by(Loan_Status) %>% 
   summarise(Count = n(),
-            MeanCoapplicantIncome=round(mean(CoapplicantIncome),2),
-            MeanLog=round(mean(Log_CoapplicantIncome),2))
+            MeanCoapplicantIncome=mean(CoapplicantIncome) %>%  round(2))
 ```
 
-```{r message=F, echo=FALSE, fig.cap=">*Applicants with disapproved loan status have slightly higher log co-applicant income mean.*"  }  
+
+```{r}
 data %>% 
-  filter(CoapplicantIncome>0) %>% 
-  mutate(Log_CoapplicantIncome = log(CoapplicantIncome)) %>% 
   group_by(Loan_Status) %>% 
-  summarise(MeanCoapplicantIncome=round(mean(CoapplicantIncome),2),
-            MeanLog=round(mean(Log_CoapplicantIncome),2)) %>% 
-  ggplot(aes(x=Loan_Status,y=MeanLog))+
-  theme_minimal()+
+  summarise(Count = n(),
+            MeanCoapplicantIncome=mean(CoapplicantIncome) %>% round(2)) %>% 
+  ggplot(aes(x = Loan_Status, y = MeanCoapplicantIncome))+
   geom_col(fill=c("#F8766D","#00BFC4"))+
-  geom_text(aes(label=MeanLog), vjust = -0.5, fontface = "bold")+
-  scale_y_continuous(trans='log10')+
-  ggtitle("Log Coapplicant Income and Loan Status")
+  geom_text(aes(label=MeanCoapplicantIncome), vjust = -0.5, fontface = "bold")+
+  ggtitle("Mean Coapplicant Income and Loan Status")+
+  theme_minimal()
 ```
 
-#### 8. Loan Amount Term and Loan Status
+
+#### 9. Loan Amount Term and Loan Status
 ```{r message=FALSE}
 data %>% 
   filter(Loan_Amount_Term != "") %>% 
@@ -292,7 +280,7 @@ data %>%
   theme_minimal()
 ```
 
-#### 9. Credit History and Loan Status
+#### 10. Credit History and Loan Status
 
 ```{r message=FALSE}
 data %>% 
@@ -317,7 +305,7 @@ data %>%
 
 ```
 
-#### 10. Property Area and Loan Status
+#### 11. Property Area and Loan Status
 
 ```{r message=FALSE}
 data %>% 
