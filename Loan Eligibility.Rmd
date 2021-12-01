@@ -7,15 +7,24 @@ knit: (function(input_file, encoding) {
  output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
 author: "Jake Bersabe"
 date: "02/11/2021"
-output: rmarkdown::html_document
+output: 
+  html_document:
+    css: "style.css"
+    toc: true
+    toc_float: true
 ---
-Let's start by importing the data set.
-```{r setup, include=T,message=FALSE}
-library(dplyr)
-data <- read.csv("train.csv")
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.align = 'center', warning = F, message = F)
 ```
-```{r include=FALSE}
-as_tibble(data)
+
+
+
+Let's start by importing the data set.
+```{r}
+library(dplyr)
+library(printr)
+data <- readr::read_csv("train.csv")
 ```
 
 
@@ -24,10 +33,10 @@ glimpse(data)
 ```
 
 
-### Visualizations
+
 Through visual reports, let us explore the data and see if relationships can be found between the variables. Our focus will be on the target variable - Loan_Status.
 
-#### 1. Gender and Loan Status
+### 1. Gender and Loan Status
 ```{r, message=F}
 data %>% 
   filter(Gender != "") %>% 
@@ -54,7 +63,7 @@ data %>%
 ```
 
 
-#### 2. Civil Status and Loan Status
+### 2. Civil Status and Loan Status
 ```{r message=FALSE}
 data %>% 
   filter(Married != "") %>% 
@@ -76,7 +85,7 @@ data %>%
   scale_y_continuous(limits = c(0,100))
 ```
 
-#### 3. Number of Dependents and Loan Status
+### 3. Number of Dependents and Loan Status
 ```{r message=FALSE}
 data %>% 
   filter(Dependents != "") %>% 
@@ -99,7 +108,7 @@ data %>%
 
 ```
 
-#### 4. Educational Background and Loan Status
+### 4. Educational Background and Loan Status
 
 ```{r message=FALSE}
 data %>% 
@@ -122,7 +131,7 @@ data %>%
   scale_y_continuous(limits = c(0,100))
 ```
 
-#### 5. Self-employment and Loan Status
+### 5. Self-employment and Loan Status
 
 ```{r message=F}
 data %>% 
@@ -145,7 +154,7 @@ data %>%
   scale_y_continuous(limits = c(0,100))
 ```
 
-#### 6. Loan Amount and Loan Status
+### 6. Loan Amount and Loan Status
 First, let us check the distribution of data.
 ```{r fig.cap=">*The distribution of loan amount is right-skewed due to outliers. We need to perform logarithmic transformation to deal with the outliers.*"}
 data %>% 
@@ -184,7 +193,7 @@ data %>%
 
 
 
-#### 7. Applicant Income and Loan Status
+### 7. Applicant Income and Loan Status
 Again, let us check the distribution.
 
 ```{r fig.cap=">*Just like the loan amount, the distribution of applicant income is right-skewed too. Proceed with logarithmic transformation.*"}
@@ -221,7 +230,7 @@ data %>%
 ```
 
 
-#### 8. Co-applicant Income and Loan Status
+### 8. Co-applicant Income and Loan Status
 Again, let us check the distribution.
 
 ```{r fig.cap=">*The distribution of the co-applicant income is right-skewed and bi-modal.*"}
@@ -254,7 +263,7 @@ data %>%
 ```
 
 
-#### 9. Loan Amount Term and Loan Status
+### 9. Loan Amount Term and Loan Status
 ```{r message=FALSE}
 data %>% 
   filter(Loan_Amount_Term != "") %>% 
@@ -280,7 +289,7 @@ data %>%
   theme_minimal()
 ```
 
-#### 10. Credit History and Loan Status
+### 10. Credit History and Loan Status
 
 ```{r message=FALSE}
 data %>% 
@@ -305,7 +314,7 @@ data %>%
 
 ```
 
-#### 11. Property Area and Loan Status
+### 11. Property Area and Loan Status
 
 ```{r message=FALSE}
 data %>% 
