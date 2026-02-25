@@ -1,4 +1,4 @@
-### Data exploration using the dplyr and data visualization using ggplot2
+I'm in a journey to knowing everything there is to know about computers!
 
 <!--
 **jebersabe/jebersabe** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
