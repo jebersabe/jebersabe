@@ -1,4 +1,4 @@
-I'm in a journey to knowing everything there is to know about computers!
+I'm on a journey to learn everything there is to know about computers!
 
 <!--
 **jebersabe/jebersabe** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
